@@ -33,12 +33,15 @@ Some of the Data Science practices (or whatever you call them) could be made usi
 * **The letter 'A'** is the most used letter in the words with **120719 times** and **the letter 'J'** is the least used letter in the words with **970 times.**
 
 * Example graphs:
+
 ![Graph of Letters vs. First Letters](/files/graph_1.png)
 ![Graph of Letters vs. Letters Used](/files/graph_2.png)
 ![Graph of Lengths vs. Words on the Length](/files/graph_3.png)
 
 ### Used
 * [ScraPy](https://scrapy.org/) - To scrape the words, took 6 hours and 51 minutes to scrape 92k words (codes not necessary)
+
+* [Matplotlib](https://matplotlib.org/) - To create plot examples
 
 * [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) - To scrape couple of websites (previous version)
 
