@@ -114,6 +114,6 @@ def make_list(source, target):
 
 if __name__ == '__main__':
     if '--search' in sys.argv:
-        print(meaning_scraper(sys.argv[-1]))
+        print(meaning_scraper(' '.join(sys.argv[2:])))
     if '--ml' in sys.argv:
         make_list(sys.argv[-2], sys.argv[-1])
