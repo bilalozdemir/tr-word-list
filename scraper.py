@@ -103,14 +103,12 @@ def make_list(source, target):
     """
     with open(source, 'r') as _s:
         words = _s.read().split('\n')
-    _s.close()
     with open(target, 'r+') as _t:
         for word in words:
             try:
                 _t.write(word + '**' + meaning_scraper(word) + '%%\n')
             except UserError:
                 _t.write(word + '**0%%\n')
-    _t.close()
     print('Done!')
 
 
