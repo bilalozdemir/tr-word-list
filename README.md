@@ -1,5 +1,5 @@
 # A Few Turkish Words
-`word.json` contains all the **92406 words** in the Turkish Goverment's official online dictionary. Previous version of this file `words_meanings_big.txt` (which contains approximately 48k words) is still being kept in this repository in case of someone would want to practice with a smaller data or a different type of file.
+`words.json` contains all the **92406 words** in the Turkish Goverment's official online dictionary. Previous version of this file `words_meanings_big.txt` (which contains approximately 48k words) is still being kept in this repository in case of someone would want to practice with a smaller data or a different type of file.
 
 The text file is formatted as shown below:
 ```
@@ -38,7 +38,7 @@ Some of the Data Science practices (or whatever you call them) could be made usi
 ![Graph of Lengths vs. Words on the Length](/files/graph_3.png)
 
 ### Used
-* [ScraPy](https://scrapy.org/) - To scrape the words, took 6 hours and 51 minutes to scrape 92k words (codes not necessary)
+* [Scrapy](https://scrapy.org/) - To scrape the words, took 6 hours and 51 minutes to scrape 92k words (codes not necessary)
 
 * [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) - To scrape couple of websites (previous version)
 
@@ -48,7 +48,7 @@ Some of the Data Science practices (or whatever you call them) could be made usi
 
 ### Sources
 * [Wiktionary - Tr](https://www.wiktionary.org.tr) - 48k words (previous version, with **BS4**)
-* [Türk Dil Kurumu](http://sozluk.gov.tr/) - 92406 words (current version, with **ScraPy**)
+* [Türk Dil Kurumu](http://sozluk.gov.tr/) - 92406 words (current version, with **Scrapy**)
 
 ### Disclaimer (TR)
 5846 sayılı Fikir ve Sanat Eserleri kanununun 35. maddesi (İktibas Serbestisi) doğrultusunda yukarıda belirtilen alenileşmiş eserlerden bazı kısımlar derlenerek ticari amaç güdülmeksizin işlenebilir bir kelime veri tabanı oluşturulmuş olup telif hakkı sahiplerinin umuma arz hakları hiçbir şekilde ihlal edilmemiştir.

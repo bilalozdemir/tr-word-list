@@ -1,1 +1,2 @@
 beautifulsoup4==4.7.1
+matplotlib==3.0.3
