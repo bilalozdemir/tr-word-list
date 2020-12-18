@@ -1,119 +1,80 @@
 """
 MEANING SCRAPER SCRIPT
 
-    This script scraps meanings of the words out of the given source and
-    concatenates them together into a '.txt' file.
-
-    Classes
-    -------
-        UserError
-            Catches user errors, instances defined with their error messages
-
-            Values:
-                err: error message
-
-            Functions:
-                __str__: returns error message
-
-    Functions
-    ---------
-        meaning_scraper: adds words to the database
-
-        word_scraper: scraps the data out of a file and put into the database
-
-    USAGE (flags)
-    -------------
-        '--search <word>'
-            looks for meaning(s) of the word on the given url
-
-        '--ml <source txt file> <target txt file>'
-            pulls the words from the source file, finds their meanings and puts
-            them together in the target file
-
+This script makes `GET` requests to `BASE_URL` `ITEM_COUNT` times, parses the
+response and writes the output dictionaries into `words.json` file.
 """
 
-import re
+import logging
+import time
 import sys
-from urllib.parse import quote_plus
-from urllib.request import HTTPCookieProcessor, build_opener
-from bs4 import BeautifulSoup
 
-MEANING_MATCH = re.compile('\"anlam\":\"(.*?)\"')
-OPENURL = build_opener(HTTPCookieProcessor()) #Defining our url opener
+import httpx
+import orjson
 
-class UserError(Exception):
-    """Catching User Errors"""
+from typing import Union
 
-    def __init__(self, err):
-        super(UserError, self).__init__()
-        self.err = err
+BASE_URL = "https://www.sozluk.gov.tr/gts_id"
+ITEM_COUNT = 92407
 
-    def __str__(self):
-        return self.err
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] :: %(asctime)s :: %(message)s :: Log at func <%(funcName)s>')
 
-def meaning_scraper(word):
+def parse_meanings(data: Union[list, dict], index: int) -> Union[dict, None]:
+    """Scrape 'item' and 'meanings' of the item from given 'data'.
+
+    :param data:
+    :type data: dict
+    :return: Return scraped data in dictionary format.
+    :rtype: dict
     """
-    Looks and scrapes the meaning of the word
+    try:
+        _dict_data = data[0]
+        item = _dict_data['madde']
+        meanings = [meaning['anlam'] for meaning in _dict_data['anlamlarListe']]
+    except (KeyError, TypeError) as e:
+        logging.warning(f"Unexpected error occured at index <{index}>! :: {e}")
+        return None
+    except:
+        logging.critical(f"Uncaught error occured at index <{index}>!")
+        return None
 
-    ...
+    return {'word': item, 'meanings': meanings}
 
-    Arguments
-    ----------
-        word: str
-            Word wanted to be searched
-
-    Raises
-    ------
-        UserError:
-            When no meaning is found for the given word
-
-    Returns
-    -------
-        _s: str
-            A formatted string that holds word and the meaning(s) of the word
+def main() -> None:
+    """Create an iterator object over the response items and yield parsed data,
+    write the data into 'words.json' and log if successful.
     """
-    html = OPENURL.open('http://sozluk.gov.tr/gts?ara={}'.format(quote_plus(word)))
-    soup = BeautifulSoup(html, 'lxml', from_encoding="utf-8")
-    body = soup.find('body')
-    _s = '\n'.join(re.findall(MEANING_MATCH, body.get_text()))
+    # TODO: Multi-threaded requests.
+    def response_iterator(n: int):
+        for i in range(1, n + 1):
+            _response = httpx.get(BASE_URL, params={'id': i})
+            _parsed_data = parse_meanings(_response.json(), i)
+            if not _parsed_data:
+                continue
+            yield _parsed_data
 
-    if not _s:
-        err = 'There is no meaning(s) found for the word: {}'.format(word)
-        raise UserError(err)
+    _iterator = response_iterator(ITEM_COUNT)
+    _parsed_count = 0
+    with open('words.json', 'w+') as file:
+        file.write('[')
+        for parsed_data in _iterator:
+            _parsed_count += 1
+            file.write('\n\t' + orjson.dumps(parsed_data, option=orjson.OPT_INDENT_2).decode('utf-8') + ',')
+        file.write('\n]')
 
-    return _s
-
-def make_list(source, target):
-    """
-    Looks and scrapes the meaning of the word
-
-    ...
-
-    Arguments
-    ----------
-        source: str
-            path for source text file
-        target: str
-            path for target text file
-
-    Raises
-    ------
-        UserError:
-            When no meaning is found for the given word in 'meaning_scraper'
-    """
-    with open(source, 'r') as _s:
-        words = _s.read().split('\n')
-    with open(target, 'r+') as _t:
-        for word in words:
-            try:
-                _t.write(word + '**' + meaning_scraper(word) + '%%\n')
-            except UserError:
-                _t.write(word + '**0%%\n')
-    print('Done!')
-
+    logging.info(f"{_parsed_count}/{ITEM_COUNT} ({100*_parsed_count//ITEM_COUNT}%) items has been written in 'words.json' succesfully.")
 
 if __name__ == '__main__':
-    if '--search' in sys.argv:
-        print(meaning_scraper(' '.join(sys.argv[2:])))
-    if '--ml' in sys.argv:
-        make_list(sys.argv[-2], sys.argv[-1])
+    start_time = time.time()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # TODO: Handle KeyboardInterrupt. Fix broken data.
+        # Ending comma (,) should be deleted and Close Square Bracket (]) should
+        # be inserted to a new line
+        logging.critical("Keyboard Interrupt handling not yet implemented!"\
+        " You have to fix the written data manually.")
+        sys.exit(0)
+    end_time = time.time()
+    logging.info(f"Time elapsed: {end_time - start_time:.2f} second(s)")
+    quit() # Gracefully exit program
