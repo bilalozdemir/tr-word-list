@@ -8,11 +8,10 @@ response and writes the output dictionaries into `words.json` file.
 import logging
 import time
 import sys
+from typing import Union
 
 import httpx
 import orjson
-
-from typing import Union
 
 BASE_URL = "https://www.sozluk.gov.tr/gts_id"
 ITEM_COUNT = 92407
@@ -31,10 +30,10 @@ def parse_meanings(data: Union[list, dict], index: int) -> Union[dict, None]:
         _dict_data = data[0]
         item = _dict_data['madde']
         meanings = [meaning['anlam'] for meaning in _dict_data['anlamlarListe']]
-    except (KeyError, TypeError) as e:
-        logging.warning(f"Unexpected error occured at index <{index}>! :: {e}")
+    except (KeyError, TypeError) as _e:
+        logging.warning(f"Unexpected error occured at index <{index}>! :: {_e}")
         return None
-    except:
+    else:
         logging.critical(f"Uncaught error occured at index <{index}>!")
         return None
 
@@ -45,8 +44,8 @@ def main() -> None:
     write the data into 'words.json' and log if successful.
     """
     # TODO: Multi-threaded requests.
-    def response_iterator(n: int):
-        for i in range(1, n + 1):
+    def response_iterator(_n: int):
+        for i in range(1, _n + 1):
             _response = httpx.get(BASE_URL, params={'id': i})
             _parsed_data = parse_meanings(_response.json(), i)
             if not _parsed_data:
@@ -65,7 +64,7 @@ def main() -> None:
     logging.info(f"{_parsed_count}/{ITEM_COUNT} ({100*_parsed_count//ITEM_COUNT}%) items has been written in 'words.json' succesfully.")
 
 if __name__ == '__main__':
-    start_time = time.time()
+    START_TIME = time.time()
     try:
         main()
     except KeyboardInterrupt:
@@ -75,6 +74,6 @@ if __name__ == '__main__':
         logging.critical("Keyboard Interrupt handling not yet implemented!"\
         " You have to fix the written data manually.")
         sys.exit(0)
-    end_time = time.time()
-    logging.info(f"Time elapsed: {end_time - start_time:.2f} second(s)")
-    quit() # Gracefully exit program
+    END_TIME = time.time()
+    logging.info(f"Time elapsed: {END_TIME - START_TIME:.2f} second(s)")
+    sys.exit(0) # Gracefully exit program
